@@ -1,0 +1,136 @@
+name: Windows Custom Build
+
+on:
+  push:
+    branches: [ build, test ]
+  workflow_dispatch:
+    inputs:
+      skip-resources:
+        description: 'Skip resource replacement? (true/false)'
+        required: false
+        default: 'false'
+      skip-menu:
+        description: 'Skip menu modifications? (true/false)'
+        required: false
+        default: 'false'
+
+jobs:
+  build:
+    runs-on: windows-2022
+    environment: build
+    if: "!contains(github.event.head_commit.message, '[skip build]') && !contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[skip win]') && !contains(github.event.head_commit.message, '[skip win-tar]')"
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+      
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        architecture: 'x64'
+
+    - name: Install global dependencies
+      run: |
+        npm install -g node-gyp
+        npm install -g yarn
+        
+    - name: Install project dependencies
+      run: |
+        npm un node-pty serialport
+        npm i
+        npm i -S -E node-pty@1.1.0-beta14
+        npm i -S -E serialport@13.0.0
+
+    # ================= 菜单修改步骤 =================
+    - name: Remove Help Menu
+      if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip-menu == 'false' }}
+      run: |
+        $menuFile = "src/app/lib/menu.js"
+        
+        # 1. 删除整个帮助菜单部分
+        # 使用正则表达式匹配整个帮助菜单块并删除
+        $newContent = (Get-Content $menuFile -Raw) -replace `
+          "{\s*role: 'help',\s*label: e\('help'\),\s*submenu: \[[^\]]*\]\s*},?", ""
+        
+        # 2. 应用修改
+        $newContent | Set-Content $menuFile
+        
+        # 3. 移除关于窗口函数（如果存在）
+        $actionFile = "src/app/actions/app.js"
+        if (Test-Path $actionFile) {
+            (Get-Content $actionFile) -replace `
+                "export function openAbout \(\) \{\s*const aboutWin = new AboutWin\(\)\s*aboutWin\.show\(\)\s*}", `
+                "// export function openAbout [removed by build]" |
+            Set-Content $actionFile
+        }
+        
+        # 4. 清空关于页面
+        $aboutPage = "src/client/views/about.ejs"
+        if (Test-Path $aboutPage) {
+            Set-Content $aboutPage "<!-- Removed by build -->"
+        }
+        
+        # 5. 验证修改
+        Write-Output "Help menu removed successfully!"
+        Get-Content $menuFile | Select-String "help" -Context 5
+        
+    # ================= 资源替换步骤 =================
+    - name: Replace resources
+      if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip-resources == 'false' }}
+      run: |
+        # 创建资源目录
+        New-Item -ItemType Directory -Path custom-resources -Force
+        
+        # 替换核心资源包
+        if (Test-Path "custom-resources/electerm-resource") {
+          Write-Output "Replacing entire resource package..."
+          Remove-Item -Recurse -Force node_modules/@electerm/electerm-resource -ErrorAction SilentlyContinue
+          Copy-Item -Recurse custom-resources/electerm-resource node_modules/@electerm/
+        }
+        
+        # 替换背景图
+        if (Test-Path "custom-resources/window-bg.jpg") {
+          Write-Output "Replacing background image..."
+          Copy-Item -Force custom-resources/window-bg.jpg node_modules/@electerm/electerm-resource/res/imgs/
+        }
+        
+        # 替换托盘图标
+        if (Test-Path "custom-resources/tray-icons") {
+          Write-Output "Replacing tray icons..."
+          Copy-Item -Recurse -Force custom-resources/tray-icons/* node_modules/@electerm/electerm-resource/tray-icons/
+        }
+        
+        # 替换应用图标（需预先生成）
+        if (Test-Path "custom-resources/icons") {
+          Write-Output "Replacing app icons..."
+          Copy-Item -Recurse -Force custom-resources/icons/* build/icons/
+        }
+        
+        # 验证替换结果
+        Write-Output "资源替换完成:"
+        Get-ChildItem node_modules/@electerm/electerm-resource/res/imgs
+        
+    # ================= 编译步骤 =================
+    - name: Build application
+      run: npm run b
+      
+    - name: Create Windows installer
+      if: "!contains(github.event.head_commit.message, 'skip build')"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BUILD_NUMBER: ${{ secrets.BUILD_NUMBER }}
+        CUSTOM_UPLOAD_URL: ${{ secrets.CUSTOM_UPLOAD_URL }}
+      run: node build/bin/build-win-tar
+      
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: electerm-installer
+        path: dist/*.tar.gz
