@@ -18,8 +18,8 @@ const iconPath = resolve(
   __dirname,
   (
     isDev
-      ? '../../../node_modules/@electerm/electerm-resource/res/imgs/electerm-round-128x128.png'
-      : '../assets/images/electerm-round-128x128.png'
+      ? '../../../icons/128x128.png'
+      : '../assets/images/128x128.png'
   )
 )
 const trayIconPath = resolve(

@@ -6,7 +6,7 @@ import { PureComponent } from 'react'
 import {
   Popover
 } from 'antd'
-import logoRef from '@electerm/electerm-resource/res/imgs/electerm.svg'
+import logoRef from '../../../../icons/128x128.png'
 import { shortcutDescExtend } from '../shortcuts/shortcut-handler.js'
 import MenuRender from './sys-menu.jsx'
 import { refsStatic } from '../common/ref.js'

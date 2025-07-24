@@ -2,11 +2,12 @@
  * app upgrade
  */
 
-import { refsStatic } from '../components/common/ref'
+// import { refsStatic } from '../components/common/ref'
 
 export default Store => {
   Store.prototype.onCheckUpdate = (noSkip = true) => {
-    refsStatic.get('upgrade')?.appUpdateCheck(noSkip)
+    // refsStatic.get('upgrade')?.appUpdateCheck(noSkip)
+    return false
   }
   Store.prototype.getProxySetting = function () {
     const {

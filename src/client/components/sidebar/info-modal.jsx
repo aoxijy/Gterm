@@ -32,7 +32,8 @@ export default auto(function InfoModal (props) {
   }
 
   const renderCheckUpdate = () => {
-    if (window.et.isWebApp || srcsSkipUpgradeCheck.includes(props.installSrc)) {
+    if (window.et.isWebApp || window.et.skipUpgradeCheck || srcsSkipUpgradeCheck.includes(props.installSrc)) {
+      console.log('skip upgrade check for web app or custom src')
       return null
     }
     const {

@@ -13,6 +13,7 @@ const base = {
   version: pack.version,
   isDev: !isProd,
   siteName: pack.name,
+  skipUpgradeCheck: true,
   stylus: loadDevStylus()
 }
 

@@ -2,9 +2,7 @@
  * constants
  */
 import { getUiThemeConfig } from './ui-theme'
-import logoPath1Ref from '@electerm/electerm-resource/res/imgs/electerm-round-128x128.png'
-import logoPath2Ref from '@electerm/electerm-resource/res/imgs/electerm.png'
-import logoPath3Ref from '@electerm/electerm-resource/res/imgs/electerm-watermark.png'
+import logoPath1Ref from '../../../icons/128x128.png'
 import dbDefaults from './db-defaults'
 import { get as _get } from 'lodash-es'
 export const packInfo = typeof window.et.packInfo === 'undefined' ? window.pre.packInfo : window.et.packInfo
@@ -18,8 +16,8 @@ const buildConst = (props) => {
 }
 
 export const logoPath1 = logoPath1Ref.replace(/^\//, '')
-export const logoPath2 = logoPath2Ref.replace(/^\//, '')
-export const logoPath3 = logoPath3Ref.replace(/^\//, '')
+export const logoPath2 = logoPath1
+export const logoPath3 = logoPath1
 export const maxEditFileSize = 1024 * 3000
 export const defaultBookmarkGroupId = 'default'
 export const newBookmarkIdPrefix = 'new-bookmark'

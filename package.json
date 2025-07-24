@@ -1,9 +1,8 @@
 {
-  "name": "electerm",
+  "name": "gterm",
   "version": "1.100.20",
   "description": "Terminal/ssh/telnet/serialport/sftp client(linux, mac, win)",
   "main": "app.js",
-  "bin": "npm/electerm",
   "scripts": {
     "app": "node build/bin/app",
     "build": "npm run vite-build",
@@ -31,12 +30,12 @@
   },
   "license": "MIT",
   "langugeRepo": "https://github.com/electerm/electerm-locales",
-  "privacyNoticeLink": "https://github.com/electerm/electerm/wiki/privacy-notice",
-  "knownIssuesLink": "https://github.com/electerm/electerm/wiki/Know-issues",
-  "sponsorLink": "https://electerm.html5beta.com/sponsor-electerm.html",
+  "privacyNoticeLink": "https://github.com/aoxijy/Gterm",
+  "knownIssuesLink": "https://github.com/aoxijy/Gterm",
+  "sponsorLink": "https://github.com/aoxijy/Gterm",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electerm/electerm.git"
+    "url": "git+https://github.com/aoxijy/Gterm.git"
   },
   "author": {
     "name": "ZHAO Xudong",
@@ -44,10 +43,10 @@
     "url": "https://github.com/zxdong262"
   },
   "bugs": {
-    "url": "https://github.com/electerm/electerm/issues"
+    "url": "https://github.com/aoxijy/Gterm/issues"
   },
-  "homepage": "https://electerm.html5beta.com",
-  "releases": "https://github.com/electerm/electerm/releases",
+  "homepage": "https://github.com/aoxijy/Gterm",
+  "releases": "https://github.com/aoxijy/Gterm/releases",
   "engines": {
     "node": ">=18.0.0"
   },

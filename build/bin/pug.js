@@ -23,6 +23,7 @@ const data = {
   version: pack.version,
   siteName: pack.name,
   isDev: false,
+  skipUpgradeCheck: true,
   stylus: stylusString
 }
 const htmlContent = pug.render(pugContent, {

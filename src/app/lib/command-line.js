@@ -15,7 +15,7 @@ function parseCommandLine (argv, options) {
 
   prog
     .version(version)
-    .name('electerm')
+    .name('gterm')
     .usage('[options] sshServer')
     .description(`
 ### Connect ssh server from command line examples:
