@@ -1,5 +1,5 @@
 {
-  "appId": "org.electerm.electerm",
+  "appId": "org.gterm.gterm",
   "directories": {
     "app": "work/app",
     "output": "dist",
