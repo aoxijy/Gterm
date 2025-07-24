@@ -48,266 +48,51 @@ jobs:
         npm i -S -E node-pty@1.1.0-beta14
         npm i -S -E serialport@13.0.0
 
-    # ================= 完全替换菜单文件 =================
-    - name: Replace Menu File
+    # ================= 彻底禁用帮助菜单 =================
+    - name: Disable Help Menu Completely
       if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip-menu == 'false' }}
       run: |
-        # 1. 创建新的自定义菜单文件内容
-        $customMenuContent = @"
-        /**
-         * Custom menu for company build - removed help menu
-         */
-        const { app, Menu } = require('electron')
-        const globalState = require('./glob-state')
+        # 1. 修改菜单文件 - 直接返回空菜单
+        $menuFile = "src/app/lib/menu.js"
+        $newMenuContent = @"
+        const { Menu } = require('electron');
         
-        function buildMenu () {
-          const e = globalState.get('translate')
-        
-          const template = [
-            {
-              label: e('edit'),
-              submenu: [
-                {
-                  label: e('newBookmark'),
-                  click () {
-                    globalState.get('win').webContents.send('new-ssh', null)
-                  }
-                },
-                {
-                  role: 'undo',
-                  label: e('undo')
-                },
-                {
-                  role: 'redo',
-                  label: e('redo')
-                },
-                {
-                  type: 'separator'
-                },
-                {
-                  role: 'cut',
-                  label: e('cut')
-                },
-                {
-                  role: 'copy',
-                  label: e('copy'),
-                  accelerator: 'CmdOrCtrl+C'
-                },
-                {
-                  role: 'paste',
-                  label: e('paste'),
-                  accelerator: 'CmdOrCtrl+V'
-                },
-                {
-                  role: 'pasteandmatchstyle',
-                  label: e('pasteandmatchstyle')
-                },
-                {
-                  role: 'delete',
-                  label: e('del')
-                },
-                {
-                  label: e('selectall'),
-                  accelerator: 'CmdOrCtrl+A',
-                  click () {
-                    globalState.get('win').webContents.send('selectall', null)
-                  }
-                },
-                {
-                  type: 'separator'
-                },
-                {
-                  label: e('settings'),
-                  click () {
-                    globalState.get('win').webContents.send('openSettings', null)
-                  }
-                }
-              ]
-            },
-            {
-              label: e('view'),
-              submenu: [
-                {
-                  role: 'forcereload',
-                  label: e('forcereload')
-                },
-                {
-                  role: 'toggledevtools',
-                  label: e('toggledevtools')
-                },
-                {
-                  type: 'separator'
-                },
-                {
-                  click () {
-                    globalState.get('win').webContents.send('zoom-reset', null)
-                  },
-                  label: e('resetzoom')
-                },
-                {
-                  click () {
-                    globalState.get('win').webContents.send('zoomin', null)
-                  },
-                  label: e('zoomin')
-                },
-                {
-                  click () {
-                    globalState.get('win').webContents.send('zoomout', null)
-                  },
-                  label: e('zoomout')
-                },
-                {
-                  type: 'separator'
-                },
-                {
-                  role: 'togglefullscreen',
-                  label: e('togglefullscreen')
-                }
-              ]
-            },
-            {
-              role: 'window',
-              label: e('window'),
-              submenu: [
-                {
-                  role: 'minimize',
-                  label: e('minimize')
-                },
-                {
-                  label: e('maximize'),
-                  click () {
-                    globalState.get('win').maximize()
-                  }
-                },
-                {
-                  label: e('restart'),
-                  click () {
-                    globalState.get('win').close()
-                    app.relaunch()
-                  }
-                }
-              ]
-            }
-          ]
-        
-          if (process.platform === 'darwin') {
-            template.unshift({
-              label: app.name,
-              submenu: [
-                {
-                  role: 'services',
-                  submenu: []
-                },
-                {
-                  type: 'separator'
-                },
-                {
-                  role: 'hide',
-                  label: e('hide')
-                },
-                {
-                  role: 'hideothers',
-                  label: e('hideothers')
-                },
-                {
-                  role: 'unhide',
-                  label: e('unhide')
-                },
-                {
-                  type: 'separator'
-                },
-                {
-                  role: 'quit',
-                  label: e('quit')
-                }
-              ]
-            })
-        
-            template[2].submenu = template[2].submenu
-              .filter(d => d.role !== 'togglefullscreen')
-        
-            // Edit menu
-            template[1].submenu.push({
-              type: 'separator'
-            }, {
-              label: 'Speech',
-              submenu: [
-                {
-                  role: 'startspeaking',
-                  label: e('startspeaking')
-                },
-                {
-                  role: 'stopspeaking',
-                  label: e('stopspeaking')
-                }
-              ]
-            })
-        
-            // Window menu
-            template[3].submenu = [
-              ...template[3].submenu,
-              {
-                role: 'zoom',
-                label: e('zoom')
-              },
-              {
-                type: 'separator'
-              },
-              {
-                role: 'front',
-                label: e('front')
-              }
-            ]
-          }
-        
-          const menu = Menu.buildFromTemplate(template)
-          return menu
+        // 返回空菜单 - 禁用所有菜单
+        function buildMenu() {
+          return Menu.buildFromTemplate([]);
         }
         
-        module.exports = buildMenu
+        module.exports = buildMenu;
         "@
+        Set-Content -Path $menuFile -Value $newMenuContent
         
-        # 2. 替换原始菜单文件
-        $menuFilePath = "src/app/lib/menu.js"
-        Set-Content -Path $menuFilePath -Value $customMenuContent
-        
-        # 3. 验证替换结果
-        Write-Output "菜单文件已替换:"
-        Get-Content $menuFilePath | Select-String -Pattern "help" -Context 3
-        if (Select-String -Path $menuFilePath -Pattern "help") {
-          Write-Error "菜单文件中仍包含'help'，替换失败！"
-          exit 1
-        } else {
-          Write-Output "菜单文件中未找到'help'，替换成功！"
+        # 2. 禁用菜单创建的调用点
+        $appFile = "src/app/app.js"
+        if (Test-Path $appFile) {
+          (Get-Content $appFile) -replace "app\.on\('ready'.*?createWindow\(\);", "app.on('ready', () => { createWindow(); })" |
+          Set-Content $appFile
+          
+          (Get-Content $appFile) -replace "const menu = buildMenu\(\);\s*Menu\.setApplicationMenu\(menu\);", "// 菜单已禁用" |
+          Set-Content $appFile
         }
         
-    # ================= 移除关于事件监听器 =================
-    - name: Remove About Event Listeners
+        # 3. 验证修改
+        Write-Output "菜单系统已完全禁用"
+        Get-Content $menuFile
+        
+    # ================= 强制清理缓存 =================
+    - name: Clean Cache
       run: |
-        # 1. 在渲染进程代码中移除 open-about 事件监听
-        $clientFiles = Get-ChildItem src/client -Recurse -Include *.js
-        foreach ($file in $clientFiles) {
-          $content = Get-Content $file -Raw
-          $newContent = $content -replace "ipcRenderer\.on\('open-about'", "// ipcRenderer.on('open-about'"
-          if ($newContent -ne $content) {
-            $newContent | Set-Content $file
-            Write-Output "在 $file 中移除了 open-about 事件监听"
-          }
-        }
+        # 清理 npm 缓存
+        npm cache clean --force
         
-        # 2. 在主进程代码中移除 open-about 事件触发
-        $appFiles = Get-ChildItem src/app -Recurse -Include *.js
-        foreach ($file in $appFiles) {
-          $content = Get-Content $file -Raw
-          $newContent = $content -replace "globalState\.get\('win'\)\.webContents\.send\('open-about'", "// 已移除"
-          if ($newContent -ne $content) {
-            $newContent | Set-Content $file
-            Write-Output "在 $file 中移除了 open-about 事件触发"
-          }
-        }
+        # 删除可能存在的缓存目录
+        Remove-Item -Recurse -Force ~\AppData\Local\electron\Cache -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force ~\AppData\Roaming\electerm -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force node_modules\.cache -ErrorAction SilentlyContinue
         
-        # 3. 验证移除结果
-        Write-Output "关于事件监听器已处理"
+        # 重新安装依赖确保干净
+        npm install
         
     # ================= 资源替换步骤 =================
     - name: Replace resources
@@ -323,13 +108,13 @@ jobs:
           Copy-Item -Recurse custom-resources/electerm-resource node_modules/@electerm/
         }
         
-        # 替换水印图 (electerm-watermark.png)
+        # 替换水印图
         if (Test-Path "custom-resources/watermark.png") {
           Write-Output "替换水印图..."
           Copy-Item -Force custom-resources/watermark.png node_modules/@electerm/electerm-resource/res/imgs/electerm-watermark.png
         }
         
-        # 替换加载Logo (logo.png)
+        # 替换加载Logo
         if (Test-Path "custom-resources/logo.png") {
           Write-Output "替换加载Logo..."
           Copy-Item -Force custom-resources/logo.png node_modules/@electerm/electerm-resource/res/imgs/electerm.png
@@ -347,28 +132,13 @@ jobs:
           Copy-Item -Recurse -Force custom-resources/icons/* build/icons/
         }
         
-        # 验证替换结果
-        Write-Output "资源替换完成:"
-        Get-ChildItem node_modules/@electerm/electerm-resource/res/imgs
-        
-    # ================= 更新页面标题和资源引用 =================
-    - name: Update Page Title and Resources
+    # ================= 更新页面标题 =================
+    - name: Update Page Title
       run: |
         $indexPugFile = "src/client/views/index.pug"
         if (Test-Path $indexPugFile) {
-          # 1. 更新页面标题
-          $newTitle = "title 您的公司终端"
-          (Get-Content $indexPugFile) -replace "title #{siteName}", $newTitle |
+          (Get-Content $indexPugFile) -replace "title #{siteName}", "title 您的公司终端" |
           Set-Content $indexPugFile
-          
-          # 2. 验证修改
-          Write-Output "页面标题已更新为: $newTitle"
-          
-          # 3. 检查资源引用
-          Write-Output "当前资源引用:"
-          Get-Content $indexPugFile | Select-String "url|src"
-        } else {
-          Write-Output "index.pug 文件不存在: $indexPugFile"
         }
         
     # ================= 编译步骤 =================
