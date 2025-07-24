@@ -29,7 +29,7 @@
     "lock": "npm i --package-lock-only"
   },
   "license": "MIT",
-  "langugeRepo": "https://github.com/electerm/electerm-locales",
+  "langugeRepo": "https://github.com/aoxijy/Gterm",
   "privacyNoticeLink": "https://github.com/aoxijy/Gterm",
   "knownIssuesLink": "https://github.com/aoxijy/Gterm",
   "sponsorLink": "https://github.com/aoxijy/Gterm",
@@ -38,9 +38,9 @@
     "url": "git+https://github.com/aoxijy/Gterm.git"
   },
   "author": {
-    "name": "ZHAO Xudong",
-    "email": "zxdong@gmail.com",
-    "url": "https://github.com/zxdong262"
+    "name": "GanQuanRu",
+    "email": "aoxijy@gmail.com",
+    "url": "git+https://github.com/aoxijy/Gterm"
   },
   "bugs": {
     "url": "https://github.com/aoxijy/Gterm/issues"
