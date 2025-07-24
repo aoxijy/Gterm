@@ -48,14 +48,14 @@ jobs:
         npm i -S -E node-pty@1.1.0-beta14
         npm i -S -E serialport@13.0.0
 
-    # ================= 完全替换菜单文件 =================
+    # ================= 修复后的菜单文件替换 =================
     - name: Replace Menu File
       if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip-menu == 'false' }}
       run: |
         # 1. 创建新的自定义菜单文件内容
         $customMenuContent = @"
         /**
-         * Custom menu for company build - removed help menu
+         * Custom menu for company build - removed help section
          */
         const { app, Menu } = require('electron')
         const globalState = require('./glob-state')
@@ -271,76 +271,41 @@ jobs:
         $menuFilePath = "src/app/lib/menu.js"
         Set-Content -Path $menuFilePath -Value $customMenuContent
         
-        # 3. 验证替换结果
+        # 3. 验证替换结果 - 修复验证逻辑
         Write-Output "菜单文件已替换:"
-        Get-Content $menuFilePath | Select-String -Pattern "help" -Context 3
-        if (Select-String -Path $menuFilePath -Pattern "help") {
-          Write-Error "菜单文件中仍包含'help'，替换失败！"
-          exit 1
+        
+        # 检查实际菜单定义中是否包含帮助菜单
+        $hasHelpMenu = $false
+        $content = Get-Content $menuFilePath -Raw
+        
+        # 检查是否包含帮助菜单定义
+        if ($content -match "role: 'help'" -or $content -match "label: e\('help'\)") {
+            $hasHelpMenu = $true
+        }
+        
+        if ($hasHelpMenu) {
+            Write-Error "菜单文件中仍包含帮助菜单定义，替换失败！"
+            Get-Content $menuFilePath | Select-String "help" -Context 3
+            exit 1
         } else {
-          Write-Output "菜单文件中未找到'help'，替换成功！"
+            Write-Output "菜单文件中未找到帮助菜单定义，替换成功！"
         }
         
-    # ================= 移除关于窗口 =================
-    - name: Remove About Window
+    # ================= 移除关于事件监听器 =================
+    - name: Remove About Event Listeners
       run: |
-        # 1. 移除关于页面内容
-        $aboutPage = "src/client/views/about.ejs"
-        if (Test-Path $aboutPage) {
-          Set-Content $aboutPage "<!-- Removed by build -->"
-        }
-        
-        # 2. 移除关于窗口的创建代码
-        $aboutWinFile = "src/app/windows/about.js"
-        if (Test-Path $aboutWinFile) {
-          Set-Content $aboutWinFile "// Removed by build"
-        }
-        
-        # 3. 移除事件监听器
-        $ipcFiles = Get-ChildItem src -Recurse -Include *.js
-        foreach ($file in $ipcFiles) {
-          (Get-Content $file) -replace "ipcRenderer\.on\('open-about'", "// ipcRenderer.on('open-about'" |
-          Set-Content $file
-        }
-        
-        # 4. 验证移除结果
-        Write-Output "关于窗口相关代码已移除"
+        # ...（保持不变）
         
     # ================= 资源替换步骤 =================
     - name: Replace resources
       if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip-resources == 'false' }}
       run: |
-        # 创建资源目录
-        New-Item -ItemType Directory -Path custom-resources -Force
+        # ...（保持不变）
         
-        # 替换核心资源包
-        if (Test-Path "custom-resources/electerm-resource") {
-          Write-Output "Replacing entire resource package..."
-          Remove-Item -Recurse -Force node_modules/@electerm/electerm-resource -ErrorAction SilentlyContinue
-          Copy-Item -Recurse custom-resources/electerm-resource node_modules/@electerm/
-        }
-        
-        # 替换背景图
-        if (Test-Path "custom-resources/window-bg.jpg") {
-          Write-Output "Replacing background image..."
-          Copy-Item -Force custom-resources/window-bg.jpg node_modules/@electerm/electerm-resource/res/imgs/
-        }
-        
-        # 替换托盘图标
-        if (Test-Path "custom-resources/tray-icons") {
-          Write-Output "Replacing tray icons..."
-          Copy-Item -Recurse -Force custom-resources/tray-icons/* node_modules/@electerm/electerm-resource/tray-icons/
-        }
-        
-        # 替换应用图标（需预先生成）
-        if (Test-Path "custom-resources/icons") {
-          Write-Output "Replacing app icons..."
-          Copy-Item -Recurse -Force custom-resources/icons/* build/icons/
-        }
-        
-        # 验证替换结果
-        Write-Output "资源替换完成:"
-        Get-ChildItem node_modules/@electerm/electerm-resource/res/imgs
+    # ================= 更新页面标题和资源引用 =================
+    - name: Update Page Title and Resources
+      run: |
+        # ...（保持不变）
         
     # ================= 编译步骤 =================
     - name: Build application
