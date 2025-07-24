@@ -137,51 +137,6 @@ function buildMenu () {
         }
       ]
     },
-    {
-      role: 'help',
-      label: e('help'),
-      submenu: [
-        {
-          label: e('about'),
-          click () {
-            globalState.get('win').webContents.send('open-about', null)
-          }
-        },
-        {
-          label: e('checkUpdate'),
-          click () {
-            globalState.get('win').webContents.send('checkupdate', null)
-          }
-        },
-        {
-          label: e('reportIssue'),
-          click () {
-            shell
-              .openExternal('https://github.com/electerm/electerm/issues/new')
-          }
-        },
-        {
-          label: 'github',
-          click () {
-            shell
-              .openExternal('https://github.com/electerm/electerm')
-          }
-        },
-        {
-          label: e('homepage'),
-          click () {
-            shell
-              .openExternal(packInfo.homepage)
-          }
-        },
-        {
-          label: e('toggledevtools'),
-          click () {
-            globalState.get('win').webContents.openDevTools()
-          }
-        }
-      ]
-    }
   ]
 
   if (process.platform === 'darwin') {
