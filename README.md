@@ -4,5 +4,4 @@
 
 A custom build of [electerm](https://github.com/electerm/electerm)
 
-
-<img src="src/res/glogo.png", alt="" />
+![Gterm Logo](icons/128x128.png)
