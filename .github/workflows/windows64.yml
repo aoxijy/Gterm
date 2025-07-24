@@ -55,7 +55,6 @@ jobs:
         $menuFile = "src/app/lib/menu.js"
         
         # 1. 删除整个帮助菜单部分
-        # 使用正则表达式匹配整个帮助菜单块并删除
         $newContent = (Get-Content $menuFile -Raw) -replace `
           "{\s*role: 'help',\s*label: e\('help'\),\s*submenu: \[[^\]]*\]\s*},?", ""
         
@@ -129,8 +128,9 @@ jobs:
         CUSTOM_UPLOAD_URL: ${{ secrets.CUSTOM_UPLOAD_URL }}
       run: node build/bin/build-win-tar
       
+    # ================= 更新后的 Artifact 上传步骤 =================
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: electerm-installer
         path: dist/*.tar.gz
