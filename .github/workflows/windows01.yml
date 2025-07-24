@@ -3,7 +3,7 @@ name: win-tar
 on:
   push:
     branches: [ build, test ]
-  workflow_dispatch: # ✅ 允许手动触发构建
+  workflow_dispatch: # ✅ 支持手动触发构建
 
 jobs:
   build:
@@ -12,31 +12,51 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip build]') && !contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[skip win]') && !contains(github.event.head_commit.message, '[skip win-tar]')"
 
     steps:
-      - uses: actions/checkout@v4
+      - name: 📦 Checkout source
+        uses: actions/checkout@v4
 
-      - name: Use Node.js 20.x
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
 
-      - uses: actions/setup-python@v5
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.7'
           architecture: 'x64'
 
-      - run: npm install -g node-gyp
-      - run: npm install -g yarn
-      - run: npm uninstall node-pty serialport
-      - run: npm install
-      - run: npm install --save --save-exact node-pty@1.1.0-beta14
-      - run: npm install --save --save-exact serialport@13.0.0
+      - name: 🛠 Install global tools
+        run: |
+          npm install -g node-gyp
+          npm install -g yarn
 
-      - run: npm run b
+      - name: 🧹 Clean and install dependencies
+        run: |
+          npm uninstall node-pty serialport
+          npm install
+          npm install --save --save-exact node-pty@1.1.0-beta14
+          npm install --save --save-exact serialport@13.0.0
 
-      - name: build
-        if: "!contains(github.event.head_commit.message, 'skip build')"
+      - name: 🏗 Build project
+        run: npm run b
+
+      - name: 📦 Run win-tar build script
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUILD_NUMBER: ${{ secrets.BUILD_NUMBER }}
           CUSTOM_UPLOAD_URL: ${{ secrets.CUSTOM_UPLOAD_URL }}
         run: node build/bin/build-win-tar
+
+      - name: 📤 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: win-tar-artifacts
+          path: |
+            dist/**
+            output/**
+            release/**
+            *.zip
+            *.exe
+            *.tar.gz
+          if-no-files-found: warn
