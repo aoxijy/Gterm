@@ -29,11 +29,24 @@
     "lock": "npm i --package-lock-only"
   },
   "license": "MIT",
+  "langugeRepo": "https://github.com/electerm/electerm-locales",
+  "privacyNoticeLink": "https://github.com/aoxijy/Gterm",
+  "knownIssuesLink": "https://github.com/aoxijy/Gterm",
   "sponsorLink": "https://github.com/aoxijy/Gterm",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aoxijy/Gterm.git"
+  },
+  "author": {
+    "name": "ZHAO Xudong",
+    "email": "zxdong@gmail.com",
+    "url": "https://github.com/zxdong262"
+  },
   "bugs": {
     "url": "https://github.com/aoxijy/Gterm/issues"
   },
   "homepage": "https://github.com/aoxijy/Gterm",
+  "releases": "https://github.com/aoxijy/Gterm/releases",
   "engines": {
     "node": ">=18.0.0"
   },
